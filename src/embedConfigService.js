@@ -50,7 +50,7 @@ async function getEmbedParamsForSingleReport(workspaceId, reportId, additionalDa
     // Get report info by calling the PowerBI REST API
 
     // BELOW LINE IS NOT A GOOD IDEA IN PRODUCTION
-    process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0 
+    process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
     const result = await fetch(reportInGroupApi, {
         method: 'GET',
         headers: headers,
@@ -174,6 +174,7 @@ async function getEmbedTokenForSingleReportSingleWorkspace(reportId, datasetIds,
         })
     }
 
+    // Add row-level-security permissions
     formData['identities'] = [
         {
           "username": "kubon",
