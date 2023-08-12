@@ -16,6 +16,46 @@ $.ajax({
     dataType: "json",
     success: function (embedData) {
 
+        // ---- ADDED: set slicer value -----
+        const target = {
+            table: "Serve Date",
+            column: "Date Code"    
+        }
+        
+        const dateFilter = {
+            $schema: "http://powerbi.com/product/schema#advanced",
+            target: target,
+            logicalOperator: "And",
+            conditions: [
+                {
+                  operator: "GreaterThanOrEqual",
+                  //this need to be stored and retrieved from local storage
+                  value: "2023-07-04T00:00:00.000"
+                },
+                {
+                  operator: "LessThan",
+                  //this need to be stored and retrieved from local storage
+                  //the date is always 1 day after the selected date
+                  value: "2023-07-07T00:00:00.000"
+                }
+              ],
+            filterType: models.FilterType.Advanced
+        }
+        
+        
+        const slicers = [
+            {
+              selector: {
+                $schema: "http://powerbi.com/product/schema#slicerTargetSelector",
+                target: target 
+              },
+              state: {
+                filters: [dateFilter]
+              }
+            }
+        ];
+        // ---- -----
+
         // Create a config object with type of the object, Embed details and Token Type
         let reportLoadConfig = {
             type: "report",
@@ -24,6 +64,10 @@ $.ajax({
 
             // Use other embed report config based on the requirement. We have used the first one for demo purpose
             embedUrl: embedData.embedUrl[0].embedUrl,
+
+            // ---- ADDED pass slicer
+            slicers: slicers
+            // -------
 
             // Enable this setting to remove gray shoulders from embedded report
             // settings: {
@@ -50,8 +94,35 @@ $.ajax({
         report.off("rendered");
 
         // Triggers when a report is successfully embedded in UI
-        report.on("rendered", function () {
-            console.log("Report render successful");
+        report.on("rendered", async function () {
+            try {
+                const pages = await report.getPages();
+                // Retrieve the active page.
+                let pageWithSlicer = pages.filter(function (page) {
+                    return page.isActive;
+                })[0];
+            
+                const visuals = await pageWithSlicer.getVisuals();
+            
+                // Retrieve all visuals with the type "slicer".
+                let slicers = visuals.filter(function (visual) {
+                    return visual.type === "slicer";
+                });
+            
+                slicers.forEach(async (slicer) => {
+                    // Get the slicer state.
+                    const state = await slicer.getSlicerState();
+                    // console.log(state['targets'][0]['table'])
+                    if (state['targets'][0]['table'] === 'Serve Date' && state['targets'][0]['column'] === 'Date Code') {
+                        slicer.on('selectionChange', function(e) {
+                            localStorage.setItem('fromDate', state['filters'][0]['conditions'][0]['value'])
+                            localStorage.setItem('toDate', state['filters'][0]['conditions'][1]['value'])
+                        })
+                    }
+                });
+                return slicerValues
+            }
+            catch (e) {}
         });
 
         // Clear any other error handler events

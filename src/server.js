@@ -38,9 +38,9 @@ app.get('/getEmbedToken', async function (req, res) {
             "error": configCheckResult
         });
     }
+
     // Get the details like Embed URL, Access token and Expiry
     let result = await embedToken.getEmbedInfo();
-
     // result.status specified the statusCode that will be sent along with the result object
     res.status(result.status).send(result);
 });

@@ -46,7 +46,7 @@ async function getEmbedInfo() {
 async function getEmbedParamsForSingleReport(workspaceId, reportId, additionalDatasetId) {
     const reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${reportId}`;
     const headers = await getRequestHeader();
-
+    
     // Get report info by calling the PowerBI REST API
 
     // BELOW LINE IS NOT A GOOD IDEA IN PRODUCTION
@@ -138,7 +138,7 @@ async function getEmbedParamsForMultipleReports(workspaceId, reportIds, addition
 
     // Get Embed token multiple resources
     reportEmbedConfig.embedToken = await getEmbedTokenForMultipleReportsSingleWorkspace(reportIds, datasetIds, workspaceId);
-    console.log('success')
+
     return reportEmbedConfig;
 }
 
@@ -177,10 +177,9 @@ async function getEmbedTokenForSingleReportSingleWorkspace(reportId, datasetIds,
     // Add row-level-security permissions
     formData['identities'] = [
         {
-          "username": "kubon",
+          "username": "johnwick",
           "roles": [
-            "RESCUAD",
-            "RESCUTT"
+            "TOOLSTATN"
           ],
           "datasets": [
             datasetIds[0]
@@ -200,6 +199,7 @@ async function getEmbedTokenForSingleReportSingleWorkspace(reportId, datasetIds,
     
     if (!result.ok)
         throw result;
+
     return result.json();
 }
 
@@ -319,6 +319,7 @@ async function getRequestHeader() {
     try {
         tokenResponse = await auth.getAccessToken();
     } catch (err) {
+        console.log(err)
         if (err.hasOwnProperty('error_description') && err.hasOwnProperty('error')) {
             errorResponse = err.error_description;
         } else {

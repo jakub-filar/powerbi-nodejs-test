@@ -33,6 +33,7 @@ const getAccessToken = async function () {
 
     // Service Principal auth is the recommended by Microsoft to achieve App Owns Data Power BI embedding
     if (config.authenticationMode.toLowerCase() === "serviceprincipal") {
+
         msalConfig.auth.clientSecret =  config.clientSecret
         const clientApplication = new msal.ConfidentialClientApplication(msalConfig);
 
