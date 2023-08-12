@@ -319,7 +319,6 @@ async function getRequestHeader() {
     try {
         tokenResponse = await auth.getAccessToken();
     } catch (err) {
-        console.log(err)
         if (err.hasOwnProperty('error_description') && err.hasOwnProperty('error')) {
             errorResponse = err.error_description;
         } else {

@@ -17,9 +17,14 @@ $.ajax({
     success: function (embedData) {
 
         // ---- ADDED: set slicer value -----
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + "T23:00:00.000Z"
+        const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + "T23:00:00.000Z"
+        const storedStartDate = localStorage.getItem('returnsDashboardStoredStartDate')
+        const storedEndDate = localStorage.getItem('returnsDashboardStoredEndDate')
+
         const target = {
             table: "Serve Date",
-            column: "Date Code"    
+            column: "Date Code"
         }
         
         const dateFilter = {
@@ -29,19 +34,21 @@ $.ajax({
             conditions: [
                 {
                   operator: "GreaterThanOrEqual",
-                  //this need to be stored and retrieved from local storage
-                  value: "2023-07-04T00:00:00.000"
+                  //value to be retrieved from local storage
+                  //if not available - subtract 7 days from today
+                  //date is always in format YYYY-MM-DDT23:00:00.000Z (eg. 2023-07-03T23:00:00.000Z)
+                  value: storedStartDate ? storedStartDate : weekAgo
                 },
                 {
                   operator: "LessThan",
-                  //this need to be stored and retrieved from local storage
-                  //the date is always 1 day after the selected date
-                  value: "2023-07-07T00:00:00.000"
+                  //value to be retrieved from local storage
+                  //if not available - yesterday date
+                  //date is always in format YYYY-MM-DDT23:00:00.000Z (eg. 2023-07-12T23:00:00.000Z)
+                  value: storedEndDate ? storedEndDate : yesterday
                 }
               ],
             filterType: models.FilterType.Advanced
         }
-        
         
         const slicers = [
             {
@@ -104,7 +111,7 @@ $.ajax({
             
                 const visuals = await pageWithSlicer.getVisuals();
             
-                // Retrieve all visuals with the type "slicer".
+                // Retrieve all visuals with the type "slicer"
                 let slicers = visuals.filter(function (visual) {
                     return visual.type === "slicer";
                 });
@@ -112,15 +119,16 @@ $.ajax({
                 slicers.forEach(async (slicer) => {
                     // Get the slicer state.
                     const state = await slicer.getSlicerState();
-                    // console.log(state['targets'][0]['table'])
+                    
+                    // find slicer that filters table Serve Date and column Date Code
                     if (state['targets'][0]['table'] === 'Serve Date' && state['targets'][0]['column'] === 'Date Code') {
-                        slicer.on('selectionChange', function(e) {
-                            localStorage.setItem('fromDate', state['filters'][0]['conditions'][0]['value'])
-                            localStorage.setItem('toDate', state['filters'][0]['conditions'][1]['value'])
-                        })
+                        //compare local storage with slicer values and update if requred
+                        const slicerStartDate = state['filters'][0]['conditions'][0]['value']
+                        const slicerEndDate = state['filters'][0]['conditions'][1]['value']
+                        localStorage.setItem('returnsDashboardStoredStartDate', slicerStartDate)
+                        localStorage.setItem('returnsDashboardStoredEndDate', slicerEndDate)
                     }
                 });
-                return slicerValues
             }
             catch (e) {}
         });
