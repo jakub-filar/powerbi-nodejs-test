@@ -16,7 +16,7 @@ $.ajax({
     dataType: "json",
     success: function (embedData) {
 
-        // ---- ADDED: set slicer value -----
+        // ---- -------
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + "T23:00:00.000Z"
         const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + "T23:00:00.000Z"
         const storedStartDate = localStorage.getItem('returnsDashboardStoredStartDate')
@@ -34,16 +34,12 @@ $.ajax({
             conditions: [
                 {
                   operator: "GreaterThanOrEqual",
-                  //value to be retrieved from local storage
-                  //if not available - subtract 7 days from today
-                  //date is always in format YYYY-MM-DDT23:00:00.000Z (eg. 2023-07-03T23:00:00.000Z)
+                  //date in format YYYY-MM-DDT23:00:00.000Z (eg. 2023-07-03T23:00:00.000Z)
                   value: storedStartDate ? storedStartDate : weekAgo
                 },
                 {
                   operator: "LessThan",
-                  //value to be retrieved from local storage
-                  //if not available - yesterday date
-                  //date is always in format YYYY-MM-DDT23:00:00.000Z (eg. 2023-07-12T23:00:00.000Z)
+                  //date in format YYYY-MM-DDT23:00:00.000Z (eg. 2023-07-12T23:00:00.000Z)
                   value: storedEndDate ? storedEndDate : yesterday
                 }
               ],
@@ -72,7 +68,7 @@ $.ajax({
             // Use other embed report config based on the requirement. We have used the first one for demo purpose
             embedUrl: embedData.embedUrl[0].embedUrl,
 
-            // ---- ADDED pass slicer
+            // ---- pass slicer
             slicers: slicers
             // -------
 
@@ -122,7 +118,6 @@ $.ajax({
                     
                     // find slicer that filters table Serve Date and column Date Code
                     if (state['targets'][0]['table'] === 'Serve Date' && state['targets'][0]['column'] === 'Date Code') {
-                        //compare local storage with slicer values and update if requred
                         const slicerStartDate = state['filters'][0]['conditions'][0]['value']
                         const slicerEndDate = state['filters'][0]['conditions'][1]['value']
                         localStorage.setItem('returnsDashboardStoredStartDate', slicerStartDate)
